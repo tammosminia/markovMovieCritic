@@ -1,0 +1,15 @@
+group 'markov'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'scala'
+apply plugin: 'application'
+
+repositories {
+    jcenter()
+}
+
+mainClassName = "MovieCritic"
+
+dependencies {
+    testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.4'
+}

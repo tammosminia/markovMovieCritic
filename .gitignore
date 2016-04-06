@@ -1,3 +1,5 @@
+plot.list
+ratings.list
 .gradle
 build/
 
@@ -8,4 +10,6 @@ gradle-app.setting
 !gradle-wrapper.jar
 
 # Cache of project
+/plot.list
+/ratings.list
 .gradletasknamecache
