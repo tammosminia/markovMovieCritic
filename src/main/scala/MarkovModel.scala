@@ -1,10 +1,31 @@
+import scala.util.Random
+
 object MarkovModel {
   abstract class Token
   case class WordToken(word: String) extends Token
   object EndOfLine extends Token
+  object StartToken extends Token
   object EndToken extends Token
 
   case class Link(to: Token, count: Int)
+  class Links(var links: List[Link]) {
+//    links = links.filter(_.count > 1)
+
+    val totalCount = links.map(_.count).sum
+
+    def print() = links.foreach { link =>
+      println(s"  -> ${link.to} ${link.count}")
+    }
+
+    def randomTo: Token = {
+      var random = Random.nextInt(totalCount)
+      links.foreach { link =>
+        random -= link.count
+        if (random < 0) return link.to
+      }
+      throw new RuntimeException("randomTo")
+    }
+  }
 
 //  abstract class AbstractNode
 //  case class Node(token: Token, links: List[Link]) extends AbstractNode
@@ -12,13 +33,14 @@ object MarkovModel {
 
 
   def tokenize(plot: String): List[Token] = {
-    val separatedDots = plot.replace(".", " . ")
+    val dropSigns = plot.replaceAll("""[,:;]""", "")
+    val separatedDots = dropSigns.replace(".", " . ")
     val words = separatedDots.toLowerCase.split("""\s+""").toList
     val tokens = words.map {
       case "." => EndOfLine
       case word => WordToken(word)
     }
-    tokens.:+(EndToken)
+    StartToken :: tokens.:+(EndToken)
   }
 
   def learn(learnSet: List[List[Token]]): MarkovModel = {
@@ -32,20 +54,36 @@ object MarkovModel {
         case (toToken, list) => Link(toToken, list.size)
       }.toList
     }
-    new MarkovModel(countedTransitions)
+    val map = countedTransitions.mapValues(new Links(_))
+    new MarkovModel(map)
+  }
+
+  def tokensToString(tokens: List[Token]): String = {
+    val noMargins = tokens.dropWhile(_ == StartToken).takeWhile(_ != EndToken)
+    noMargins.map {
+      case EndOfLine => "."
+      case WordToken(word) => word
+    }.mkString(" ").replace(" . ", ".\n")
   }
 }
 
 import MarkovModel._
 
-class MarkovModel(map: Map[Token, List[Link]]) {
+import scala.util.Random
+
+class MarkovModel(map: Map[Token, Links]) {
   def print() = {
     map.foreach {
       case (token, links) =>
         println(token)
-        links.foreach { link =>
-          println(s"  -> ${link.to} ${link.count}")
-        }
+        links.print()
     }
+  }
+
+  def generateRandomPlot(fromToken: Token = StartToken): List[Token] = {
+    if (fromToken == EndToken) return List(EndToken)
+    val links = map(fromToken)
+    val nextToken = links.randomTo
+    fromToken :: generateRandomPlot(nextToken)
   }
 }

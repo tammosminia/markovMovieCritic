@@ -5,4 +5,5 @@ download van ftp://ftp.fu-berlin.de/pub/misc/movies/database/
 plot.list.gz
 ratings.list.gz
 
-en gunzip
+en gunzip naar data/
+vertaal dit met ConvertImdbTestSet
