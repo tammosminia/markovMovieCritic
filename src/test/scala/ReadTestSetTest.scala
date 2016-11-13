@@ -17,4 +17,19 @@ class ReadTestSetTest extends org.scalatest.FunSuite {
     assert(title === """"100 Years of Horror" (1996) {100 Years of Horror: Gory Gimmicks (#1.18)}""")
   }
 
+  test("mapRating") {
+    assert(mapRating("0.0") === 1)
+    assert(mapRating("0.1") === 1)
+    assert(mapRating("2.0") === 1)
+    assert(mapRating("2.1") === 2)
+    assert(mapRating("3.9") === 2)
+    assert(mapRating("4.0") === 2)
+    assert(mapRating("4.1") === 3)
+    assert(mapRating("6.1") === 4)
+    assert(mapRating("7.7") === 4)
+    assert(mapRating("8.0") === 4)
+    assert(mapRating("8.1") === 5)
+    assert(mapRating("10.0") === 5)
+  }
+
 }
