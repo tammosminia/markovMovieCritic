@@ -10,6 +10,7 @@ object MarkovModel {
   case class Link(to: Token, count: Int)
   class Links(var links: List[Link]) {
 //    links = links.filter(_.count > 1)
+    val linksMap: Map[Token, Int] = links.map { case Link(token, count) => token -> count }.toMap.withDefaultValue(0)
 
     val totalCount = links.map(_.count).sum
 
@@ -25,11 +26,9 @@ object MarkovModel {
       }
       throw new RuntimeException("randomTo")
     }
-  }
 
-//  abstract class AbstractNode
-//  case class Node(token: Token, links: List[Link]) extends AbstractNode
-//  object EndNode extends AbstractNode
+    def probabilityToOutput(token: Token): Double = linksMap(token).toDouble / totalCount
+  }
 
 
   def tokenize(plot: String): List[Token] = {
@@ -85,5 +84,11 @@ class MarkovModel(map: Map[Token, Links]) {
     val links = map(fromToken)
     val nextToken = links.randomTo
     fromToken :: generateRandomPlot(nextToken)
+  }
+
+  def probabilityToOutput(tokens: List[Token]): Double = tokens match {
+    case List() => 0.0
+    case List(EndToken) => 1.0
+    case head :: tail => map(head).probabilityToOutput(tail.head) * probabilityToOutput(tail)
   }
 }
