@@ -43,7 +43,8 @@ object ReadTestSet {
 
     plots.flatMap { case (title, plot) =>
       ratings.get(title).map { rating =>
-        Movie(title, plot, rating) }
+        Movie(title, plot, rating)
+      }
     }.toList
   }
 

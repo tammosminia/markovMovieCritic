@@ -11,5 +11,17 @@ repositories {
 mainClassName = "MovieCritic"
 
 dependencies {
-    testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.4'
+    compile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.4'
+}
+
+task getImdbData() << {
+    println 'getting IMDB data'
+    exec {
+        commandLine "bash", "getImdbData.sh"
+    }
+}
+
+task getData(dependsOn: [compileScala, getImdbData], type: JavaExec) {
+    main = "ConvertImdbTestSet"
+    classpath = sourceSets.main.runtimeClasspath
 }
