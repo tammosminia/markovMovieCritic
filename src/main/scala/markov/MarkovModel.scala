@@ -1,12 +1,9 @@
+package markov
+
 import scala.util.Random
+import Tokens._
 
 object MarkovModel {
-  abstract class Token
-  case class WordToken(word: String) extends Token
-  object EndOfLine extends Token
-  object StartToken extends Token
-  object EndToken extends Token
-
   case class Link(to: Token, count: Int)
   class Links(var links: List[Link]) {
 //    links = links.filter(_.count > 1)
@@ -30,18 +27,6 @@ object MarkovModel {
     def probabilityToOutput(token: Token): Double = linksMap(token).toDouble / totalCount
   }
 
-
-  def tokenize(plot: String): List[Token] = {
-    val dropSigns = plot.replaceAll("""[,:;]""", "")
-    val separatedDots = dropSigns.replace(".", " . ")
-    val words = separatedDots.toLowerCase.split("""\s+""").toList
-    val tokens = words.map {
-      case "." => EndOfLine
-      case word => WordToken(word)
-    }
-    StartToken :: tokens.:+(EndToken)
-  }
-
   def learn(learnSet: List[List[Token]]): MarkovModel = {
     val tuples: List[List[Token]] = learnSet.flatMap { tokens =>
       tokens.sliding(2).toList
@@ -57,18 +42,9 @@ object MarkovModel {
     new MarkovModel(map)
   }
 
-  def tokensToString(tokens: List[Token]): String = {
-    val noMargins = tokens.dropWhile(_ == StartToken).takeWhile(_ != EndToken)
-    noMargins.map {
-      case EndOfLine => "."
-      case WordToken(word) => word
-    }.mkString(" ").replace(" . ", ".\n")
-  }
 }
 
-import MarkovModel._
-
-import scala.util.Random
+import markov.MarkovModel._
 
 class MarkovModel(map: Map[Token, Links]) {
   def print() = {

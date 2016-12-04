@@ -1,4 +1,5 @@
-import MarkovModel._
+import markov.MarkovModel
+import markov.Tokens._
 
 object MarkovMovieCritic extends App {
   val movies = ReadTestSet.readTestSet(10000)
@@ -10,7 +11,7 @@ object MarkovMovieCritic extends App {
   val moviesByRating: Map[Int, List[Movie]] = moviesLearnSet.groupBy { case Movie(title, plot, rating) => rating }
 
   val modelsByRating = moviesByRating.map { case (rating, m) =>
-    val tokens = m.map(movie => MarkovModel.tokenize(movie.plot))
+    val tokens = m.map(movie => tokenize(movie.plot))
     val model = MarkovModel.learn(tokens)
     (rating, model)
   }
