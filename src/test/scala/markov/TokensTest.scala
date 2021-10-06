@@ -1,14 +1,35 @@
 package markov
 
-import org.scalatest.FunSuite
 import Tokens._
+import org.scalatest.funsuite.AnyFunSuite
 
-class TokensTest extends FunSuite {
+class TokensTest extends AnyFunSuite {
   val helloTokens = List(StartToken, WordToken("hello"), EndSentence, EndToken)
-  val helloWorldTokens = List(StartToken, WordToken("hello"), WordToken("world"), EndSentence, EndToken)
-  val endWithDot = List(StartToken, WordToken("end"), WordToken("with"), WordToken("dot"), EndSentence, EndToken)
-  val twoLinesTokens = List(StartToken, WordToken("first"), WordToken("line"), EndSentence,
-    WordToken("second"), WordToken("line"), EndSentence, EndToken)
+  val helloWorldTokens = List(
+    StartToken,
+    WordToken("hello"),
+    WordToken("world"),
+    EndSentence,
+    EndToken
+  )
+  val endWithDot = List(
+    StartToken,
+    WordToken("end"),
+    WordToken("with"),
+    WordToken("dot"),
+    EndSentence,
+    EndToken
+  )
+  val twoLinesTokens = List(
+    StartToken,
+    WordToken("first"),
+    WordToken("line"),
+    EndSentence,
+    WordToken("second"),
+    WordToken("line"),
+    EndSentence,
+    EndToken
+  )
 
   test("tokenize") {
     assert(tokenize("hello") === helloTokens)
