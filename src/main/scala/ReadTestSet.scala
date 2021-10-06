@@ -23,7 +23,7 @@ object ReadTestSet {
       case line if line.startsWith("PL:") && lastMovie.nonEmpty =>
         val plotLine = line.stripPrefix("PL:").trim
         val newPlot = plots.get(lastMovie.get) match {
-          case None => plotLine
+          case None          => plotLine
           case Some(oldPlot) => oldPlot + " " + plotLine
         }
         plots = plots.updated(lastMovie.get, newPlot)
@@ -37,7 +37,7 @@ object ReadTestSet {
       case ratingsRegex(rating, title) =>
         val ratingInStars = mapRating(rating)
         ratings = ratings.updated(title, ratingInStars)
-        println(s"added $title, $ratingInStars stars")
+//        println(s"added $title, $ratingInStars stars")
       case _ =>
     }
 
@@ -49,7 +49,7 @@ object ReadTestSet {
   }
 
   def writeTestSet(movies: List[Movie]) = {
-    val writer = new PrintWriter(new File("data/movies" ))
+    val writer = new PrintWriter(new File("data/movies"))
     writer.println(s"Total ${movies.size}")
     Random.shuffle(movies).foreach { movie =>
       writer.println(movie.title)
@@ -61,9 +61,16 @@ object ReadTestSet {
   }
 
   def readTestSet(amount: Int): List[Movie] = {
-    Source.fromFile("data/movies").getLines.drop(1).grouped(4).take(amount).map { lines: Seq[String] =>
-      Movie(lines(0), lines(1), lines(2).toInt)
-    }.toList
+    Source
+      .fromFile("data/movies")
+      .getLines
+      .drop(1)
+      .grouped(4)
+      .take(amount)
+      .map { lines: Seq[String] =>
+        Movie(lines(0), lines(1), lines(2).toInt)
+      }
+      .toList
   }
 
 }
