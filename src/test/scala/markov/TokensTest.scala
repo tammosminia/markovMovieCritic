@@ -2,16 +2,15 @@ package markov
 
 import Tokens._
 import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.prop.Configuration.Workers
 
 class TokensTest extends AnyFunSuite {
   val ed = Dictionary(Set("hello", "world", "end", "with", "dot", "first", "second", "line"))
-  val helloTokens = List(StartToken, WordToken("hello"), EndSentence, EndToken)
+  val helloTokens = List(StartToken, WordToken("hello"), EndToken)
   val helloWorldTokens = List(
     StartToken,
     WordToken("hello"),
     WordToken("world"),
-    EndSentence,
+    SignToken("!"),
     EndToken
   )
   val endWithDot = List(
@@ -19,17 +18,17 @@ class TokensTest extends AnyFunSuite {
     WordToken("end"),
     WordToken("with"),
     WordToken("dot"),
-    EndSentence,
+    SignToken("."),
     EndToken
   )
   val twoLinesTokens = List(
     StartToken,
     WordToken("first"),
     WordToken("line"),
-    EndSentence,
+    SignToken("."),
     WordToken("second"),
     WordToken("line"),
-    EndSentence,
+    SignToken("."),
     EndToken
   )
 
@@ -43,16 +42,16 @@ class TokensTest extends AnyFunSuite {
   }
 
   test("tokensToString") {
-    assert(tokensToString(helloTokens) === "Hello.")
-    assert(tokensToString(helloWorldTokens) === "Hello world.")
+    assert(tokensToString(helloTokens) === "Hello")
+    assert(tokensToString(helloWorldTokens) === "Hello world!")
     assert(tokensToString(endWithDot) === "End with dot.")
     assert(tokensToString(twoLinesTokens) === "First line. Second line.")
   }
 
-  test("multiple dots") {
-    assert(tokenize("first line .. second line", ed) === twoLinesTokens)
-    assert(tokenize("first line ..... second line......", ed) === twoLinesTokens)
-  }
+//  test("multiple dots") {
+//    assert(tokenize("first line .. second line", ed) === twoLinesTokens)
+//    assert(tokenize("first line ..... second line......", ed) === twoLinesTokens)
+//  }
 
   test("weird spacing") {
     assert(tokenize("hello ", ed) === helloTokens)
@@ -60,10 +59,11 @@ class TokensTest extends AnyFunSuite {
     assert(tokenize(" hello", ed) === helloTokens)
     assert(tokenize("  hello", ed) === helloTokens)
     assert(tokenize("  hello  ", ed) === helloTokens)
-    assert(tokenize(" ", ed) === List(StartToken, EndSentence, EndToken))
-    assert(tokenize("  ", ed) === List(StartToken, EndSentence, EndToken))
-    assert(tokenize(" . ", ed) === List(StartToken, EndSentence, EndToken))
-    assert(tokenize("first line   .  .   second line", ed) === twoLinesTokens)
+    assert(tokenize(" ", ed) === List(StartToken, EndToken))
+    assert(tokenize("  ", ed) === List(StartToken, EndToken))
+    assert(tokenize(" . ", ed) === List(StartToken, SignToken("."), EndToken))
+    assert(tokenize("first line   .     second line  .  ", ed) === twoLinesTokens)
+    assert(tokenize("first line.second line.", ed) === twoLinesTokens)
   }
 
   test("words that dont occur in the library") {
@@ -73,7 +73,6 @@ class TokensTest extends AnyFunSuite {
         WordToken("first"),
         InfrequentWord,
         InfrequentWord,
-        EndSentence,
         EndToken
       )
     )
@@ -82,13 +81,13 @@ class TokensTest extends AnyFunSuite {
   val plots = List("hello world!", "End, with:dot.", "First line.Second line.")
 
   test("build dictionary should skip words that occur only once") {
-    val d = Dictionary.build(plots)
+    val d = Dictionary.build(plots, 2)
 
     assert(d == Dictionary(Set("line")))
   }
 
   test("build dictionary with all words occurring at least twice") {
-    val d = Dictionary.build(plots ++ plots)
+    val d = Dictionary.build(plots ++ plots, 2)
 
     assert(d == ed)
   }

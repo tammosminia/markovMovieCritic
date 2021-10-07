@@ -6,7 +6,7 @@ object MarkovMovieCritic extends App {
   val movies = ReadTestSet.readTestSet(totalTestSet)
   val moviesLearnSet = movies.take((movies.size * 0.9).toInt)
   val moviesTestSet = movies.drop((movies.size * 0.1).toInt)
-  val dictionary = Dictionary.build(movies.map(_.plot))
+  val dictionary = Dictionary.build(movies.map(_.plot), 5)
   println(s"dictionary contains ${dictionary.words.size} words")
 
   println(s"learning models from ${moviesLearnSet.length} examples")
