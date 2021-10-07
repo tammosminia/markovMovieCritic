@@ -3,7 +3,7 @@ import markov.Tokens._
 
 object MarkovMovieCritic extends App {
   val totalTestSet = 283664
-  val movies = ReadTestSet.readTestSet(totalTestSet)
+  val movies = ReadTestSet.readTestSet(10000)
   val moviesLearnSet = movies.take((movies.size * 0.9).toInt)
   val moviesTestSet = movies.drop((movies.size * 0.1).toInt)
   val dictionary = Dictionary.build(movies.map(_.plot), 5)
