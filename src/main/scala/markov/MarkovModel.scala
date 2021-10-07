@@ -71,9 +71,9 @@ object MarkovModel {
     // Count how often transitions occur from Token X to Token Y for all X and Y
     val countedTransitions: Map[Token, Links] = transitions.map { case (from, toTokens: List[Token]) =>
       val tos = toTokens.groupBy(identity).map { case (toToken, allSimilar) => Link(toToken, allSimilar.size) }
-      (from, new Links(tos.toList))
+      (from, Links(tos.toList))
     }
-    new MarkovModel(countedTransitions)
+    MarkovModel(countedTransitions)
   }
 
 }
