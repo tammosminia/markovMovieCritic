@@ -3,9 +3,38 @@ package markov
 import scala.util.Random
 import Tokens._
 
+import markov.MarkovModel._
+
+case class MarkovModel(map: Map[Token, Links]) {
+  def print(): Unit = {
+    map.foreach { case (token, links) =>
+      println(token)
+      links.print()
+    }
+  }
+
+  def generateRandomPlot(fromToken: Token = StartToken): List[Token] = {
+    if (fromToken == EndToken) return List(EndToken)
+    val links = map(fromToken)
+    val nextToken = links.randomTo
+    fromToken :: generateRandomPlot(nextToken)
+  }
+
+  def probabilityToOutput(tokens: List[Token]): Double = tokens match {
+    case List()         => 0.0
+    case List(EndToken) => 1.0
+    case head :: tail =>
+      map
+        .get(head)
+        .orElse(map.get(InfrequentWord)) //if this token has not been learned on
+        .map(_.probabilityToOutput(tail.head) * probabilityToOutput(tail))
+        .getOrElse(0.0) //if it also has not learned InfrequentWord
+  }
+}
+
 object MarkovModel {
   case class Link(to: Token, count: Int)
-  class Links(links: List[Link]) {
+  case class Links(links: List[Link]) {
     val linksMap: Map[Token, Int] = links
       .map { case Link(token, count) => token -> count }
       .toMap
@@ -32,49 +61,19 @@ object MarkovModel {
       linksMap(token).toDouble / totalCount
   }
 
-  def learn(learnSet: List[List[Token]]): MarkovModel = {
-    val tuples: List[List[Token]] = learnSet.flatMap { tokens =>
-      tokens.sliding(2).toList
+  def learn(learnSet: List[Plot]): MarkovModel = {
+    // Create a list of all transitions from one Token to another, including doubles
+    val tuples: List[(Token, Token)] = learnSet.flatMap { plot =>
+      plot.sliding(2).toList.map { case List(from, to) => (from, to) }
     }
     val transitions: Map[Token, List[Token]] =
-      tuples.groupBy(_.head).mapValues(tuples => tuples.map(_(1))).toMap
-    val countedTransitions: Map[Token, List[Link]] = transitions.mapValues { toTokens: List[Token] =>
-      val grouped: Map[Token, List[Token]] = toTokens.groupBy(token => token)
-      grouped.map { case (toToken, list) =>
-        Link(toToken, list.size)
-      }.toList
-    }.toMap
-    val map = countedTransitions.mapValues(new Links(_)).toMap
-    new MarkovModel(map)
-  }
-
-}
-
-import markov.MarkovModel._
-
-class MarkovModel(map: Map[Token, Links]) {
-  def print() = {
-    map.foreach { case (token, links) =>
-      println(token)
-      links.print()
+      tuples.groupBy(_._1).map { case (from, tuples) => (from, tuples.map(_._2)) }
+    // Count how often transitions occur from Token X to Token Y for all X and Y
+    val countedTransitions: Map[Token, Links] = transitions.map { case (from, toTokens: List[Token]) =>
+      val tos = toTokens.groupBy(identity).map { case (toToken, allSimilar) => Link(toToken, allSimilar.size) }
+      (from, new Links(tos.toList))
     }
+    new MarkovModel(countedTransitions)
   }
 
-  def generateRandomPlot(fromToken: Token = StartToken): List[Token] = {
-    if (fromToken == EndToken) return List(EndToken)
-    val links = map(fromToken)
-    val nextToken = links.randomTo
-    fromToken :: generateRandomPlot(nextToken)
-  }
-
-  def probabilityToOutput(tokens: List[Token]): Double = tokens match {
-    case List()         => 0.0
-    case List(EndToken) => 1.0
-    case head :: tail =>
-      map
-        .get(head)
-        .orElse(map.get(InfrequentWord)) //if this token has not been learned on
-        .map(_.probabilityToOutput(tail.head) * probabilityToOutput(tail))
-        .getOrElse(0.0) //if it also has not learned InfrequentWord
-  }
 }

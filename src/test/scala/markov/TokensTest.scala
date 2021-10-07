@@ -1,18 +1,13 @@
 package markov
 
 import Tokens._
+import markov.Tokens.Dictionary.DictionaryImpl
 import org.scalatest.funsuite.AnyFunSuite
 
 class TokensTest extends AnyFunSuite {
-  val ed = Dictionary(Set("hello", "world", "end", "with", "dot", "first", "second", "line"))
+  val ed = DictionaryImpl(Set("hello", "world", "end", "with", "dot", "first", "second", "line"))
   val helloTokens = List(StartToken, WordToken("hello"), EndToken)
-  val helloWorldTokens = List(
-    StartToken,
-    WordToken("hello"),
-    WordToken("world"),
-    SignToken("!"),
-    EndToken
-  )
+  val helloWorldTokens = List(StartToken, WordToken("hello"), WordToken("world"), SignToken("!"), EndToken)
   val endWithDot = List(
     StartToken,
     WordToken("end"),
@@ -83,7 +78,7 @@ class TokensTest extends AnyFunSuite {
   test("build dictionary should skip words that occur only once") {
     val d = Dictionary.build(plots, 2)
 
-    assert(d == Dictionary(Set("line")))
+    assert(d == DictionaryImpl(Set("line")))
   }
 
   test("build dictionary with all words occurring at least twice") {
