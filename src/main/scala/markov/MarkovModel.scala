@@ -1,7 +1,7 @@
 package markov
 
 import scala.util.Random
-import Tokens._
+import Token._
 
 import markov.MarkovModel._
 

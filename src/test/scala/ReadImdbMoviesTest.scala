@@ -1,18 +1,15 @@
 import org.scalatest.funsuite.AnyFunSuite
+import ImdbMovies._
 
-class ReadTestSetTest extends AnyFunSuite {
-  import ReadTestSet._
+class ReadImdbMoviesTest extends AnyFunSuite {
 
   test("reg") {
-    assert(
-      "      0000000125  1634308   9.2  The Shawshank Redemption (1994)"
-        .matches(ratingsRegex.regex)
-    )
+    assert("      0000000125  1634308   9.2  The Shawshank Redemption (1994)".matches(ratingsRegex.regex))
   }
 
   test("reg extract The Shawshank Redemption") {
-    val ratingsRegex(rating, title) =
-      "      0000000125  1634308   9.2  The Shawshank Redemption (1994)"
+    val ratingsRegex(rating, title) = "      0000000125  1634308   9.2  The Shawshank Redemption (1994)"
+
     assert(rating === "9.2")
     assert(title === "The Shawshank Redemption (1994)")
   }
@@ -20,10 +17,9 @@ class ReadTestSetTest extends AnyFunSuite {
   test("reg extract 100 Years of Horror") {
     val ratingsRegex(rating, title) =
       """      0...101203      15   7.6  "100 Years of Horror" (1996) {100 Years of Horror: Gory Gimmicks (#1.18)}"""
+
     assert(rating === "7.6")
-    assert(
-      title === """"100 Years of Horror" (1996) {100 Years of Horror: Gory Gimmicks (#1.18)}"""
-    )
+    assert(title === """"100 Years of Horror" (1996) {100 Years of Horror: Gory Gimmicks (#1.18)}""")
   }
 
   test("mapRating") {

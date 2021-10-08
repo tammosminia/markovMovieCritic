@@ -1,7 +1,7 @@
 package markov
 
-import Tokens._
-import markov.Tokens.Dictionary.DictionaryImpl
+import Token._
+import markov.Dictionary.DictionaryImpl
 import org.scalatest.funsuite.AnyFunSuite
 
 class TokensTest extends AnyFunSuite {
@@ -42,11 +42,6 @@ class TokensTest extends AnyFunSuite {
     assert(tokensToString(endWithDot) === "End with dot.")
     assert(tokensToString(twoLinesTokens) === "First line. Second line.")
   }
-
-//  test("multiple dots") {
-//    assert(tokenize("first line .. second line", ed) === twoLinesTokens)
-//    assert(tokenize("first line ..... second line......", ed) === twoLinesTokens)
-//  }
 
   test("weird spacing") {
     assert(tokenize("hello ", ed) === helloTokens)

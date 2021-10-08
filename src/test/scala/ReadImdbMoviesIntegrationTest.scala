@@ -1,9 +1,7 @@
 import org.scalatest.funsuite.AnyFunSuite
 
-class ReadTestSetIntegrationTest extends AnyFunSuite {
-  import ReadTestSet._
-
-  val movies = readImdbTestSet
+class ReadImdbMoviesIntegrationTest extends AnyFunSuite {
+  val movies = ImdbMovies.readImdbMovies
 
   test("Fear and Loathing in Las Vegas (1998)") {
     val movie = movies.find(_.title == "Fear and Loathing in Las Vegas (1998)")

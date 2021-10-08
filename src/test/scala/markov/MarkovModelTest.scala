@@ -1,12 +1,12 @@
 package markov
 
 import markov.MarkovModel.{Link, Links}
-import markov.Tokens.{Dictionary, EndToken, StartToken, WordToken}
+import markov.Token.{EndToken, StartToken, WordToken}
 import org.scalatest.funsuite.AnyFunSuite
 
 class MarkovModelTest extends AnyFunSuite {
   test("learning The cat sits on the mat") {
-    val plot = Tokens.tokenize("The cat sits on the mat", Dictionary.AllWords)
+    val plot = Token.tokenize("The cat sits on the mat", Dictionary.AllWords)
 
     val r = MarkovModel.learn(List(plot))
 
