@@ -3,11 +3,11 @@ package markov
 import scala.util.Random
 import Token._
 
-import markov.MarkovModel._
+import markov.MarkovChain._
 
-case class MarkovModel(map: Map[Token, Links]) {
+case class MarkovChain(transitions: Map[Token, Links]) {
   def print(): Unit = {
-    map.foreach { case (token, links) =>
+    transitions.foreach { case (token, links) =>
       println(token)
       links.print()
     }
@@ -15,7 +15,7 @@ case class MarkovModel(map: Map[Token, Links]) {
 
   def generateRandomPlot(fromToken: Token = StartToken): List[Token] = {
     if (fromToken == EndToken) return List(EndToken)
-    val links = map(fromToken)
+    val links = transitions(fromToken)
     val nextToken = links.randomTo
     fromToken :: generateRandomPlot(nextToken)
   }
@@ -24,15 +24,15 @@ case class MarkovModel(map: Map[Token, Links]) {
     case List()         => 0.0
     case List(EndToken) => 1.0
     case head :: tail =>
-      map
+      transitions
         .get(head)
-        .orElse(map.get(InfrequentWord)) //if this token has not been learned on
+        .orElse(transitions.get(InfrequentWord)) //if this token has not been learned on
         .map(_.probabilityToOutput(tail.head) * probabilityToOutput(tail))
         .getOrElse(0.0) //if it also has not learned InfrequentWord
   }
 }
 
-object MarkovModel {
+object MarkovChain {
   case class Link(to: Token, count: Int)
   case class Links(links: List[Link]) {
     val linksMap: Map[Token, Int] = links
@@ -61,7 +61,7 @@ object MarkovModel {
       linksMap(token).toDouble / totalCount
   }
 
-  def learn(learnSet: List[Plot]): MarkovModel = {
+  def learn(learnSet: List[Plot]): MarkovChain = {
     // Create a list of all transitions from one Token to another, including doubles
     val tuples: List[(Token, Token)] = learnSet.flatMap { plot =>
       plot.sliding(2).toList.map { case List(from, to) => (from, to) }
@@ -73,7 +73,7 @@ object MarkovModel {
       val tos = toTokens.groupBy(identity).map { case (toToken, allSimilar) => Link(toToken, allSimilar.size) }
       (from, Links(tos.toList))
     }
-    MarkovModel(countedTransitions)
+    MarkovChain(countedTransitions)
   }
 
 }

@@ -1,17 +1,17 @@
 package markov
 
-import markov.MarkovModel.{Link, Links}
+import markov.MarkovChain.{Link, Links}
 import markov.Token.{EndToken, StartToken, WordToken}
 import org.scalatest.funsuite.AnyFunSuite
 
-class MarkovModelTest extends AnyFunSuite {
+class MarkovChainTest extends AnyFunSuite {
   test("learning The cat sits on the mat") {
     val plot = Token.tokenize("The cat sits on the mat", Dictionary.AllWords)
 
-    val r = MarkovModel.learn(List(plot))
+    val r = MarkovChain.learn(List(plot))
 
     assert(
-      r == MarkovModel(
+      r == MarkovChain(
         Map(
           StartToken -> Links(List(Link(WordToken("the"), 1))),
           WordToken("the") -> Links(List(Link(WordToken("cat"), 1), Link(WordToken("mat"), 1))),

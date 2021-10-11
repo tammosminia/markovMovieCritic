@@ -6,7 +6,18 @@ import scala.io.Source
 import scala.util.Random
 
 case class MovieSet(learnSet: List[Movie], testSet: List[Movie], dictionary: Dictionary) {
-  override def toString: String = s"MovieSet with ${learnSet.size} learnSet, ${testSet.size} testSet, $dictionary"
+  override def toString: String =
+    s"MovieSet with learnSet:${movieListSummary(learnSet)}, testSet:${movieListSummary(testSet)}, $dictionary"
+
+  def movieListSummary(movies: List[Movie]): String = {
+    movies
+      .groupBy(_.rating)
+      .toList
+      .sortBy(_._1)
+      .map { case (r, ms) => s"${ms.size} * $r star" }
+      .mkString(",")
+  }
+
 }
 
 object MovieSet {
