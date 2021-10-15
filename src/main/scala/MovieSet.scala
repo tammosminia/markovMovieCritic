@@ -58,7 +58,7 @@ object MovieSet {
       Movie(m.title, tokenize(m.plot, dictionary), m.rating)
     })
     val learnSet = allMovies.take((allMovies.size * 0.9).toInt)
-    val testSet = allMovies.drop((allMovies.size * 0.1).toInt)
+    val testSet = allMovies.drop((allMovies.size * 0.9).toInt)
     MovieSet(learnSet, testSet, dictionary)
   }
 

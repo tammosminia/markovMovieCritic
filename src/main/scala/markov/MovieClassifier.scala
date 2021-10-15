@@ -12,10 +12,10 @@ case class MovieClassifier(chains: Map[Rating, MarkovChain]) {
     }
     val correctPredictions = predictions.count { case (m, p) => m.rating == p }
     val inCorrectPredictions = predictions.filterNot { case (m, p) => m.rating == p }
-    Range(1, 6).foreach { r =>
-      println(s"incorrectly predicted $r: ${inCorrectPredictions.count(_._2 == r)}")
-      println(s"misrated movies with original rating $r: ${inCorrectPredictions.count(_._1.rating == r)}")
-    }
+//    Range(1, 6).foreach { r =>
+//      println(s"incorrectly predicted $r: ${inCorrectPredictions.count(_._2 == r)}")
+//      println(s"misrated movies with original rating $r: ${inCorrectPredictions.count(_._1.rating == r)}")
+//    }
     correctPredictions.toDouble / predictions.length
   }
 }
