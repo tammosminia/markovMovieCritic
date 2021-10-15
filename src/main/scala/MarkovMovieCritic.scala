@@ -11,6 +11,11 @@ object MarkovMovieCritic extends App {
   println(s"accuracy on learnSet: ${classifier.testAccuracy(movies.learnSet)}")
   println(s"accuracy on testSet: ${classifier.testAccuracy(movies.testSet)}")
 
+  println(s"all chains:")
+  classifier.chains.foreach { case (r, c) =>
+    println(s"$r stars: $c")
+  }
+
   println("generating plots for all ratings")
   classifier.chains.toList.sortBy(_._1).foreach { case (rating, model) =>
     val plot = model.generateRandomPlot()

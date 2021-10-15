@@ -53,7 +53,7 @@ object MovieSet {
   def readMovies(fraction: Int): MovieSet = {
     val totalTestSet = 283664
     val inputMovies = readRaw(totalTestSet / fraction)
-    val dictionary = Dictionary.build(inputMovies.map(_.plot), 5)
+    val dictionary = Dictionary.build(inputMovies.map(_.plot), 5000)
     val allMovies: List[Movie] = Random.shuffle(inputMovies.map { m =>
       Movie(m.title, tokenize(m.plot, dictionary), m.rating)
     })
