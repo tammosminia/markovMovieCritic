@@ -1,0 +1,130 @@
+---
+title: Markov movie critic - part 5 - generating plots
+categories: 
+  - Markov
+author: tammo-sminia
+---
+
+We'll continue the plan to rate movies with Markov chains. +
+
+
+++++
+<!-- more -->
+++++
+
+https://blog.jdriven.com/2016/11/ai-movie-critic-1/[Previous blog post] +
+https://blog.jdriven.com/category/markov/[all posts about Markov chains] +
+https://github.com/tammosminia/markovMovieCritic[code]
+
+= Classifier
+
+We will learn 5 different Markov chains, one for each rating
+
+[source,scala]
+----
+object MovieClassifier {
+  def learn(moviesLearnSet: List[Movie]): MovieClassifier = {
+    val modelsByRating: Map[Rating, MarkovChain] = moviesLearnSet
+      .groupBy(_.rating)
+      .map { case (rating, ms) =>
+        val model = MarkovChain.learn(ms.map(_.plot))
+        (rating, model)
+      }
+    MovieClassifier(modelsByRating)
+  }
+}
+----
+
+To make a prediction for a new plot. We can calculate the probability to output that plot with each Markov chain. And select the highest
+
+[source,scala]
+----
+case class MovieClassifier(chains: Map[Rating, MarkovChain]) {
+  def predict(plot: Plot): Rating =
+    chains.maxBy { case (_, model) =>
+      model.probabilityToOutput(plot)
+    }._1
+}
+----
+
+We'll read all our examples and split it into learn and testset
+
+[source,scala]
+----
+case class MovieSet(learnSet: List[Movie], testSet: List[Movie], dictionary: Dictionary)
+
+object MovieSet {
+  def readMovies(fraction: Int): MovieSet = {
+    val totalTestSet = 283664
+    val inputMovies = readRaw(totalTestSet / fraction)
+    val dictionary = Dictionary.build(inputMovies.map(_.plot), 5)
+    val allMovies: List[Movie] = Random.shuffle(inputMovies.map { m =>
+      Movie(m.title, tokenize(m.plot, dictionary), m.rating)
+    })
+    val learnSet = allMovies.take((allMovies.size * 0.9).toInt)
+    val testSet = allMovies.drop((allMovies.size * 0.1).toInt)
+    MovieSet(learnSet, testSet, dictionary)
+  }
+}
+----
+
+and tie it all together
+
+[source,scala]
+----
+case class MovieClassifier(chains: Map[Rating, MarkovChain]) {
+  def testAccuracy(movies: List[Movie]): Double = {
+    val predictions = movies.map { movie =>
+      (movie, predict(movie.plot))
+    }
+    val correctPredictions = predictions.count { case (m, p) => m.rating == p }
+    correctPredictions.toDouble / predictions.length
+  }
+}
+
+object MarkovMovieCritic extends App {
+  val movies = MovieSet.readMovies(1)
+  println(s"read movieSet $movies")
+
+  println(s"learning models")
+  val classifier = MovieClassifier.learn(movies.learnSet)
+
+  println(s"accuracy on learnSet: ${classifier.testAccuracy(movies.learnSet)}")
+  println(s"accuracy on testSet: ${classifier.testAccuracy(movies.testSet)}")
+}
+----
+
+= First test run
+
+----
+read movieSet MovieSet with 255297 learnSet, 255298 testSet, Dictionary of 87882 words
+learning models
+accuracy on learnSet: 0.8669314563038344
+accuracy on testSet: 0.7934688089996788
+----
+
+Given that random guessing results in 20% accuracy, this is not bad at all. Apparently it is possible to make a good judgement about the quality using only the plot summary.
+
+
+= First test ru
+
+first try for generating plots:
+
+```
+1 stars: After a rescue the base. The appearances of the old lion had brought only misfortune. Or is supposed to protect elephants in disturbing ways--derek must become that is about a vampire thriller reminiscent of ambush comedy. Prepare for those words possibly mean?. Are the ghost.
+2 stars: On the capital of finland. Later on their greatest adventure yet. When rockman's younger brother robert conway's film. Receives a bus.
+3 stars: In structural change that in store opening the "unknowns" experience as he has what that once drew arrives in her time training session she signs of them through revealing interviews with the unconventional method of people.
+4 stars: Einstein's dream date with iron wall in the living in new year's eve of lust. That ajit is hired comancheros on a policeman comes as a bullet out in which requires her spirit. In magazines that pact which is sondra's standing in danger and aaron scramble to the bob sullivan's equally obsessed with joy and was very serious issue of broadway house. But she was followed by the day. Saves her.
+5 stars: The ground in a rubber factory. But the thief and one of the more powerful laser gun like to be renovated on the men to raid trip very successful student frankie reid towards oregon gig playing card. Dubai. Meanwhile. The fire destroyed. They were the uk fashion designer. Polka. And has make contact with terms like the profession of the result was dealing in the temple to find rye. But he starts to break. Meanwhile. Raku in on december 10th.
+```
+
+The grammar could be better, but some of these movies sound pretty good. I really want to know in what disturbing way the old lion is going to protect the elephants
+This was learning on only 10000 examples. Surely it works better when using all 283664
+
+```
+1 stars: Welcome to the same happiness.
+5 stars: Moses pretends to make procedural errors. In reality tv creator of friendship at stake if the prize recipient. Josh finally found the guardian's new york city's water forever.
+```
+
+Better. This one sounds boring indeed :)
+
